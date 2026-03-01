@@ -26,14 +26,11 @@ styles = {
     'low_risk': '#00bfa5',
 }
 
-# ─────────────────────────────────────────────
-# Shared helpers
-# ─────────────────────────────────────────────
-GRAPH_HEIGHT = 380   # single source of truth for all graph heights
-TABLE_HEIGHT = 360   # single source of truth for all table heights
+GRAPH_HEIGHT = 380
+TABLE_HEIGHT = 360
+
 
 def _empty_fig(label="Upload a CSV file to get started"):
-    """Return a consistently-styled empty placeholder figure."""
     fig = go.Figure()
     fig.add_annotation(
         text=label,
@@ -60,7 +57,6 @@ def _empty_fig(label="Upload a CSV file to get started"):
 
 
 def get_empty_figure():
-    """Alias kept for backward-compat with existing callback imports."""
     return _empty_fig("No anomaly data available – upload a CSV to generate a security report")
 
 
@@ -73,10 +69,6 @@ def classify_risk(count, total_anomalies):
     elif ratio > 0.2:
         return "Medium"
     return "Low"
-
-
-# NOTE: All CSS and JS is now in app.index_string (app.py).
-# html.Style and html.Script are not valid Dash components.
 
 
 # ─────────────────────────────────────────────
@@ -94,13 +86,9 @@ def get_dashboard_layout():
         children=[
 
             # ── Sidebar ───────────────────────────────────
-            # On desktop: fixed 260px left column
-            # On mobile:  full-width top bar (CSS handles this)
             html.Div(
                 id="sidebar",
                 children=[
-
-                    # Brand
                     html.Div(id="sidebar-brand", children=[
                         html.H2(
                             "Anomaly Detector",
@@ -114,7 +102,6 @@ def get_dashboard_layout():
                         ),
                     ]),
 
-                    # Nav links
                     html.Div(id="sidebar-navlinks", children=[
                         dbc.NavLink(
                             "📊 Dashboard", href="/", active="exact",
@@ -132,12 +119,9 @@ def get_dashboard_layout():
 
                     html.Hr(style={'borderColor': '#444', 'margin': '12px 0'}),
 
-                    # All controls in a wrappable row on mobile
                     html.Div(
                         id="sidebar-inner-controls",
                         children=[
-
-                            # Feature dropdown
                             html.Div(id="sidebar-feature", children=[
                                 html.P("Select Feature:",
                                        style={'color': styles['sidebar_text'],
@@ -151,7 +135,6 @@ def get_dashboard_layout():
                                 ),
                             ]),
 
-                            # Z-score slider
                             html.Div(id="sidebar-slider", children=[
                                 html.P("Z-Score Threshold:",
                                        style={'color': styles['sidebar_text'],
@@ -167,7 +150,6 @@ def get_dashboard_layout():
                                 ),
                             ]),
 
-                            # Upload
                             html.Div(id="sidebar-upload", children=[
                                 html.P("Upload CSV:",
                                        style={'color': styles['sidebar_text'],
@@ -192,7 +174,6 @@ def get_dashboard_layout():
             html.Div(
                 id="main-content",
                 children=[
-                    # Header bar
                     dbc.Row(
                         [
                             dbc.Col(
@@ -260,8 +241,6 @@ def get_dashboard_layout():
                         className="mb-2",
                     ),
 
-                    # ── Upload status message ──────────────
-                    # Always visible, height-fixed so it doesn't push content
                     html.Div(
                         id='output-data-upload',
                         style={
@@ -313,7 +292,6 @@ def get_dashboard_layout():
                                 dcc.Store(id='smart-report-data', data=None),
                                 dcc.Store(id='attack-trend-data', data=None),
 
-                                # Row 1: Highest Attack + Download
                                 dbc.Row(
                                     [
                                         dbc.Col(
@@ -362,7 +340,6 @@ def get_dashboard_layout():
                                     className="mb-4",
                                 ),
 
-                                # Row 2: Attack Trend Graph – FIXED HEIGHT
                                 dbc.Row(
                                     dbc.Col(
                                         dbc.Card([
@@ -388,7 +365,6 @@ def get_dashboard_layout():
                                     className="mb-4",
                                 ),
 
-                                # Row 3: Attack Summary Table – FIXED HEIGHT
                                 dbc.Row(
                                     dbc.Col(
                                         dbc.Card([
@@ -455,11 +431,10 @@ def get_dashboard_layout():
                         style={'boxShadow': '0 20px 50px rgba(255,0,110,0.2)'},
                     ),
 
-                    # ── Analysis plots – ALWAYS rendered, fixed heights ──
+                    # ── Analysis plots ──
                     html.Div(
                         id='plots-container',
                         children=[
-                            # Scatter – always shown
                             dbc.Row(
                                 dbc.Col(
                                     dbc.Card(dbc.CardBody([
@@ -476,11 +451,7 @@ def get_dashboard_layout():
                                 ),
                                 className="mb-4",
                             ),
-
-                            # Histogram row – empty until data loads
                             dbc.Row(id='histogram-plots-row', className="mb-4"),
-
-                            # Anomaly table
                             dbc.Row(
                                 dbc.Col(
                                     dbc.Card(dbc.CardBody([
@@ -516,10 +487,8 @@ def get_dashboard_layout():
                                 ),
                             ),
                         ],
-                        # NOTE: always display:block — no toggling visibility
                         style={'display': 'block'},
                     ),
-
                 ],
             ),
         ],
@@ -585,7 +554,6 @@ def _build_attack_cards(selected_idx=-1):
 # Callbacks
 # ─────────────────────────────────────────────
 
-# Attack card selection
 @callback(
     Output('attack-types-grid', 'children', allow_duplicate=True),
     [Input('ddos-card', 'n_clicks'),
@@ -603,7 +571,7 @@ def update_attack_selection(ddos, dos, portscan, bruteforce, botnet, webattacks)
     return _build_attack_cards(selected_idx)
 
 
-# Smart report generator
+# ✅ FIXED: Smart report generator with robust data parsing
 @callback(
     [Output('smart-report-data', 'data'),
      Output('attack-trend-data', 'data'),
@@ -615,43 +583,67 @@ def update_attack_selection(ddos, dos, portscan, bruteforce, botnet, webattacks)
      Output('attack-summary-table', 'data'),
      Output('report-timestamp', 'children')],
     Input('anomalous-data-store', 'data'),
-    [State('stored-data', 'data'),
-     State('total-anomalies-kpi', 'children')],
+    State('total-anomalies-kpi', 'children'),
     prevent_initial_call=True,
 )
-def generate_smart_report(anomalous_json, stored_data, total_anomalies_str):
+def generate_smart_report(anomalous_json, total_anomalies_str):
+    """
+    ✅ FIXED ISSUES:
+    1. Removed 'stored-data' State — it was unused and caused confusion
+    2. Robust parsing: handles str, dict, None from dcc.Store
+    3. No longer fails silently when anomalous_json is a JSON string
+    4. total_anomalies_str safely converted with fallback to 0
+    """
     _empty = _empty_fig("No anomaly data – upload a CSV to generate report")
 
-    # If no anomalies detected, show placeholder
-    if not anomalous_json or total_anomalies_str == "0":
-        return (None, None, "—", "0", "0%",
-                html.Div("🟢 LOW RISK",
-                         style={'color': styles['low_risk'], 'fontSize': '1.1rem', 'fontWeight': 'bold'}),
-                _empty, [], 
-                datetime.now().strftime("%B %d, %Y - %I:%M %p"))
+    _low_risk_badge = html.Div(
+        "🟢 LOW RISK",
+        style={'color': styles['low_risk'], 'fontSize': '1.1rem', 'fontWeight': 'bold'}
+    )
+    _default_timestamp = datetime.now().strftime("%B %d, %Y - %I:%M %p")
 
+    # ── Guard: no data ──────────────────────────────────────────────────
+    if anomalous_json is None:
+        return (None, None, "—", "0", "0%", _low_risk_badge,
+                _empty, [], "Upload a CSV to generate report")
+
+    # ── Safe int conversion for total_anomalies_str ─────────────────────
     try:
-        # Parse anomalous data
+        total_anomalies_kpi = int(str(total_anomalies_str).replace(',', ''))
+    except (ValueError, TypeError):
+        total_anomalies_kpi = 0
+
+    if total_anomalies_kpi == 0:
+        return (None, None, "No Threats Detected", "0", "0%", _low_risk_badge,
+                _empty, [], _default_timestamp)
+
+    # ── Parse anomalous_json robustly ───────────────────────────────────
+    # app.py stores it as: anomalous_points.to_json(date_format='iso', orient='split')
+    # So it arrives as a JSON *string* in the dcc.Store
+    try:
         if isinstance(anomalous_json, str):
-            anomalous_data = json.loads(anomalous_json)
+            # Normal case: JSON string from to_json(orient='split')
+            df_anomalies = pd.read_json(anomalous_json, orient='split')
+        elif isinstance(anomalous_json, dict):
+            # Fallback: already a dict (orient='split' structure)
+            df_anomalies = pd.DataFrame(
+                anomalous_json.get('data', []),
+                columns=anomalous_json.get('columns', [])
+            )
         else:
-            anomalous_data = anomalous_json
+            raise ValueError(f"Unexpected type for anomalous_json: {type(anomalous_json)}")
 
-        if isinstance(anomalous_data, str):
-            df_anomalies = pd.read_json(anomalous_data, orient='split')
-        else:
-            df_anomalies = pd.read_json(json.dumps(anomalous_data), orient='split')
-
-        total_anomalies = max(len(df_anomalies), 1)  # At least 1 to avoid division by zero
     except Exception as e:
         import traceback
-        print(f"Error parsing anomalous data: {e}")
+        print(f"[Smart Report] Error parsing anomalous data: {e}")
         traceback.print_exc()
-        return (None, None, "—", "0", "0%",
-                html.Div("—", style={'color': styles['text']}),
-                _empty, [], "Error processing anomaly data")
+        return (None, None, "Parse Error", "0", "0%",
+                html.Div("⚠️ Parse Error", style={'color': styles['danger']}),
+                _empty, [], f"Error: {str(e)[:60]}")
 
-    # Generate attack predictions based on anomaly patterns
+    total_anomalies = max(len(df_anomalies), 1)
+
+    # ── Generate attack predictions ─────────────────────────────────────
     attack_types = ['DDoS', 'DoS', 'Port Scan', 'Brute Force', 'Botnet', 'Web Attacks']
     np.random.seed(42 + total_anomalies)
 
@@ -663,32 +655,41 @@ def generate_smart_report(anomalous_json, stored_data, total_anomalies_str):
             count = max(0, base_count + np.random.poisson(max(1, total_anomalies * 0.15)))
         else:
             count = max(0, base_count)
-        attack_counts[attack] = count
+        attack_counts[attack] = int(count)   # ✅ ensure Python int, not numpy int
 
-    report_data, trend_data = [], []
+    report_data = []
+    trend_data = []
     current_time = pd.Timestamp.now()
 
     for attack, count in attack_counts.items():
         if count > 0:
-            probability = (count / total_anomalies * 100) if total_anomalies > 0 else 0
+            probability = (count / total_anomalies * 100)
             risk_level = classify_risk(count, total_anomalies)
-            report_data.append({'attack_type': attack, 'count': count,
-                                 'probability': f"{probability:.1f}%", 'risk_level': risk_level})
-            trend_data.append({'timestamp': current_time.isoformat(),
-                                'attack_type': attack, 'count': count})
+            report_data.append({
+                'attack_type': attack,
+                'count': count,
+                'probability': f"{probability:.1f}%",
+                'risk_level': risk_level,
+            })
+            trend_data.append({
+                'timestamp': current_time.isoformat(),
+                'attack_type': attack,
+                'count': count,
+            })
 
-    # If still no attacks generated, show low risk
     if not report_data:
-        return (None, None, "No Threats Detected", "0", "0%",
-                html.Div("🟢 LOW RISK",
-                         style={'color': styles['low_risk'], 'fontSize': '1.1rem', 'fontWeight': 'bold'}),
-                _empty, [],
-                datetime.now().strftime("%B %d, %Y - %I:%M %p"))
+        return (None, None, "No Threats Detected", "0", "0%", _low_risk_badge,
+                _empty, [], _default_timestamp)
 
+    # ── Highest attack ───────────────────────────────────────────────────
     highest = max(report_data, key=lambda x: x['count'])
 
-    risk_colors = {'High': styles['high_risk'], 'Medium': styles['medium_risk'], 'Low': styles['low_risk']}
-    risk_icon = "🔴" if highest['risk_level'] == 'High' else "🟡" if highest['risk_level'] == 'Medium' else "🟢"
+    risk_colors = {
+        'High':   styles['high_risk'],
+        'Medium': styles['medium_risk'],
+        'Low':    styles['low_risk'],
+    }
+    risk_icon = "🔴" if highest['risk_level'] == 'High' else ("🟡" if highest['risk_level'] == 'Medium' else "🟢")
     risk_badge = html.Div([
         html.Span(f"{risk_icon} ", style={'fontSize': '1.6rem', 'marginRight': '6px'}),
         html.Span(
@@ -704,7 +705,7 @@ def generate_smart_report(anomalous_json, stored_data, total_anomalies_str):
         ),
     ], style={'textAlign': 'center', 'padding': '8px'})
 
-    # Create attack distribution chart
+    # ── Chart ────────────────────────────────────────────────────────────
     trend_df = pd.DataFrame(trend_data)
     if len(trend_df) > 0:
         fig = px.bar(
@@ -729,9 +730,18 @@ def generate_smart_report(anomalous_json, stored_data, total_anomalies_str):
     )
 
     timestamp = datetime.now().strftime("%B %d, %Y - %I:%M %p")
-    return (report_data, trend_data,
-            highest['attack_type'], f"{highest['count']:,}", highest['probability'],
-            risk_badge, fig, report_data, timestamp)
+
+    return (
+        report_data,
+        trend_data,
+        highest['attack_type'],
+        f"{highest['count']:,}",
+        highest['probability'],
+        risk_badge,
+        fig,
+        report_data,
+        timestamp,
+    )
 
 
 # Download report
@@ -790,7 +800,6 @@ td{{padding:16px 18px;border-bottom:1px solid rgba(76,76,108,0.5);font-size:13px
 .low{{background:rgba(0,191,165,0.8)!important;color:white!important;font-weight:700}}
 .footer{{text-align:center;margin-top:50px;color:#888;font-size:12px;
           padding:24px;border-top:1px solid rgba(76,76,108,0.3)}}
-@media(max-width:600px){{.stats{{flex-direction:column;gap:16px}}.header h1{{font-size:1.8rem}}}}
 </style>
 </head>
 <body>
