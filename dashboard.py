@@ -619,16 +619,19 @@ def generate_smart_report(anomalous_json, total_anomalies_str):
 
     # ── Parse anomalous_json robustly ───────────────────────────────────
     # app.py stores it as: anomalous_points.to_json(date_format='iso', orient='split')
-    # So it arrives as a JSON *string* in the dcc.Store
+    # IMPORTANT: must use io.StringIO() so pandas reads content, not a file path
     try:
+        import io as _io
+
         if isinstance(anomalous_json, str):
-            # Normal case: JSON string from to_json(orient='split')
-            df_anomalies = pd.read_json(anomalous_json, orient='split')
+            # ✅ Wrap in StringIO — prevents pandas mistaking the JSON string for a filepath
+            df_anomalies = pd.read_json(_io.StringIO(anomalous_json), orient='split')
+
         elif isinstance(anomalous_json, dict):
-            # Fallback: already a dict (orient='split' structure)
+            # Already parsed as a dict (orient='split' structure: {columns, data, index})
             df_anomalies = pd.DataFrame(
-                anomalous_json.get('data', []),
-                columns=anomalous_json.get('columns', [])
+                data=anomalous_json.get('data', []),
+                columns=anomalous_json.get('columns', []),
             )
         else:
             raise ValueError(f"Unexpected type for anomalous_json: {type(anomalous_json)}")
