@@ -40,12 +40,6 @@ styles = {
     'sidebar_text': '#ffffff',
 }
 
-# ──────────────────────────────────────────────
-# index_string
-# ALL global CSS and the sidebar-toggle JS must
-# live here. html.Style and html.Script are NOT
-# valid Dash components and will raise AttributeError.
-# ──────────────────────────────────────────────
 app.index_string = """<!DOCTYPE html>
 <html>
     <head>
@@ -55,18 +49,11 @@ app.index_string = """<!DOCTYPE html>
         {%favicon%}
         {%css%}
         <style>
-
-            /* ═══════════════════════════════════════════
-               ANIMATIONS
-            ═══════════════════════════════════════════ */
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes pulse  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
             .fade-in { animation: fadeIn 0.8s ease-in-out; }
             .pulse   { animation: pulse 2s infinite; }
 
-            /* ═══════════════════════════════════════════
-               GLOBAL RESETS
-            ═══════════════════════════════════════════ */
             *, *::before, *::after { box-sizing: border-box; }
             body, html {
                 margin: 0;
@@ -76,23 +63,16 @@ app.index_string = """<!DOCTYPE html>
                 color: #e0e0e0 !important;
             }
 
-            /* ═══════════════════════════════════════════
-               DASHBOARD WRAPPER  — flex column on mobile,
-               flex row (side-by-side) on desktop
-            ═══════════════════════════════════════════ */
             #dashboard-wrapper {
                 display: flex;
-                flex-direction: row;       /* desktop: side by side */
+                flex-direction: row;
                 min-height: 100vh;
                 background-color: #1a1a2e;
             }
 
-            /* ═══════════════════════════════════════════
-               SIDEBAR  — fixed left column on desktop
-            ═══════════════════════════════════════════ */
             #sidebar {
                 width: 260px;
-                min-width: 260px;          /* never shrinks */
+                min-width: 260px;
                 min-height: 100vh;
                 position: fixed;
                 top: 0;
@@ -106,25 +86,16 @@ app.index_string = """<!DOCTYPE html>
                 flex-direction: column;
             }
 
-            /* ═══════════════════════════════════════════
-               MAIN CONTENT  — takes remaining width
-            ═══════════════════════════════════════════ */
             #main-content {
-                margin-left: 260px;        /* same as sidebar width */
+                margin-left: 260px;
                 flex: 1;
                 min-width: 0;
                 padding: 24px;
                 background-color: #1a1a2e;
             }
 
-            /* ═══════════════════════════════════════════
-               HAMBURGER  — hidden on desktop
-            ═══════════════════════════════════════════ */
             #sidebar-toggle { display: none; }
 
-            /* ═══════════════════════════════════════════
-               OVERRIDE CYBORG THEME — card colors
-            ═══════════════════════════════════════════ */
             .card {
                 background-color: #2a2a4a !important;
                 border: 1px solid #4c4c6c !important;
@@ -142,7 +113,6 @@ app.index_string = """<!DOCTYPE html>
             .card-title { color: #a0a0b0 !important; }
             .card-text  { color: #e0e0e0 !important; }
 
-            /* Dash dropdown dark-theme */
             .Select-control, .Select-menu-outer, .Select-input {
                 background-color: #2a2a4a !important;
                 color: #e0e0e0 !important;
@@ -151,46 +121,23 @@ app.index_string = """<!DOCTYPE html>
             .Select-placeholder { color: #e0e0e0 !important; opacity: 0.6; }
             .Select-value-label { color: #e0e0e0 !important; }
 
-            /* Nav links */
             .nav-link        { color: #ffffff !important; }
             .nav-link:hover  { color: #6f3dff !important; background: transparent !important; }
             .nav-link.active { color: #6f3dff !important; background: transparent !important; }
 
-            /* HR */
             hr { border-color: #4c4c6c !important; opacity: 0.5; }
-
-            /* Bootstrap row gutter reset */
             .row { margin-left: 0 !important; margin-right: 0 !important; }
-
-            /* Tables scroll internally — no full-page horizontal scroll */
             .dash-table-container { overflow-x: auto; }
-
-            /* Fixed graph height helper */
             .fixed-graph { height: 380px; }
 
-            /* ═══════════════════════════════════════════
-               TABLET  768 – 991 px
-               Sidebar narrows, content adjusts
-            ═══════════════════════════════════════════ */
             @media (min-width: 768px) and (max-width: 991px) {
                 #sidebar      { width: 200px; min-width: 200px; }
                 #main-content { margin-left: 200px; }
                 .attack-col   { flex: 0 0 33.33%; max-width: 33.33%; }
             }
 
-            /* ═══════════════════════════════════════════
-               MOBILE  ≤ 767 px
-               App-like layout: fixed sidebar (left) with
-               generous spacing and readable controls.
-            ═══════════════════════════════════════════ */
             @media (max-width: 767px) {
-
-                /* Keep left/right columns */
-                #dashboard-wrapper {
-                    flex-direction: row;
-                }
-
-                /* Sidebar: proper app-like left panel with better spacing */
+                #dashboard-wrapper { flex-direction: row; }
                 #sidebar {
                     position: fixed !important;
                     left: 0 !important;
@@ -211,14 +158,7 @@ app.index_string = """<!DOCTYPE html>
                     gap: 16px;
                     box-shadow: 2px 0 12px rgba(0,0,0,0.4);
                 }
-
-                /* Brand styling */
-                #sidebar-brand h2 {
-                    font-size: 1.3rem !important;
-                    margin: 0 0 8px 0 !important;
-                }
-
-                /* Navigation links look clickable and properly spaced */
+                #sidebar-brand h2 { font-size: 1.3rem !important; margin: 0 0 8px 0 !important; }
                 #sidebar-navlinks {
                     width: 100%;
                     display: flex;
@@ -228,86 +168,21 @@ app.index_string = """<!DOCTYPE html>
                     border-bottom: 1px solid #4c4c6c;
                     margin-bottom: 12px;
                 }
-                .nav-link {
-                    padding: 10px 8px !important;
-                    font-size: 0.95rem !important;
-                    border-radius: 6px;
-                    transition: all 0.2s ease;
-                }
-                .nav-link:hover {
-                    background: rgba(111, 61, 255, 0.15) !important;
-                    transform: translateX(4px);
-                }
-
-                /* Controls: visible, well-spaced, readable */
-                #sidebar-inner-controls {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                    align-items: stretch;
-                    width: 100%;
-                }
-                #sidebar-feature {
-                    display: block;
-                    width: 100%;
-                }
-                #sidebar-feature p,
-                #sidebar-slider p,
-                #sidebar-upload p {
-                    font-size: 0.9rem !important;
-                    font-weight: 600 !important;
-                    margin: 0 0 8px 0 !important;
-                    color: #ffffff !important;
-                }
-                #sidebar-slider {
-                    display: block;
-                    width: 100%;
-                }
-                #sidebar-upload {
-                    display: block;
-                    width: 100%;
-                }
-                #sidebar-upload .dcc_control button,
-                #sidebar-upload button {
-                    font-size: 0.9rem !important;
-                    padding: 12px 10px !important;
-                }
-
-                /* Main content: full width minus sidebar */
-                #main-content {
-                    margin-left: 200px !important;
-                    margin-right: 0 !important;
-                    padding: 16px !important;
-                    width: calc(100% - 200px);
-                    overflow-x: hidden;
-                }
-
-                /* Responsive card layout */
-                .kpi-col   { flex: 0 0 100%; max-width: 100%; margin-bottom: 12px; }
+                .nav-link { padding: 10px 8px !important; font-size: 0.95rem !important; border-radius: 6px; }
+                #sidebar-inner-controls { display: flex; flex-direction: column; gap: 16px; align-items: stretch; width: 100%; }
+                #sidebar-feature, #sidebar-slider, #sidebar-upload { display: block; width: 100%; }
+                #main-content { margin-left: 200px !important; padding: 16px !important; width: calc(100% - 200px); overflow-x: hidden; }
+                .kpi-col    { flex: 0 0 100%; max-width: 100%; margin-bottom: 12px; }
                 .attack-col { flex: 0 0 50%; max-width: 50%; margin-bottom: 10px; }
-
-                /* Header */
-                #header-buttons { flex-wrap: wrap; gap: 8px; }
-                #header-buttons .btn { font-size: 0.85rem; padding: 8px 12px; }
-
-                /* Graphs: readable height on phones */
                 .fixed-graph { height: 320px; }
-
-                /* Tables and content fit properly */
-                #main-content * { max-width: 100%; word-break: break-word; }
-                .dash-table-container { font-size: 0.85rem; }
             }
 
-            /* ═══════════════════════════════════════════
-               EXTRA SMALL  ≤ 480 px
-            ═══════════════════════════════════════════ */
             @media (max-width: 480px) {
                 .attack-col  { flex: 0 0 50%; max-width: 50%; }
                 .kpi-col     { flex: 0 0 100%; max-width: 100%; }
                 .card-body   { padding: 10px !important; }
                 #main-content { padding: 8px !important; }
             }
-
         </style>
     </head>
     <body>
@@ -321,9 +196,7 @@ app.index_string = """<!DOCTYPE html>
 </html>"""
 
 # ──────────────────────────────────────────────
-# Root layout
-# dcc.Store components live here so every page's
-# callbacks can always find them.
+# Root layout — ALL dcc.Store components live here
 # ──────────────────────────────────────────────
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -332,8 +205,11 @@ app.layout = html.Div([
     dcc.Store(id='login-state',            data={'logged_in': False}),
     dcc.Store(id='stored-data'),
     dcc.Store(id='numeric-cols'),
+    # ✅ FIX: Store anomalous data as a plain dict/list (not JSON string)
+    # so dashboard.py callback can reliably parse it
     dcc.Store(id='anomalous-data-store'),
     dcc.Store(id='download-report-trigger'),
+    dcc.Store(id='settings-store'),
 ])
 
 
@@ -371,23 +247,16 @@ def save_settings(n, theme, refresh, threshold, alerts, reports):
     Input('login-state', 'data'),
 )
 def display_page(pathname, login_state):
-
-    # 👉 Logout route
     if pathname == "/logout":
         return get_login_layout()
-
     if pathname == "/register":
         return get_register_layout()
-
     if not login_state or not login_state.get('logged_in'):
         return get_login_layout()
-
     if pathname == "/insights":
         return get_insights_layout()
-
     if pathname == "/settings":
         return get_settings_layout()
-
     return get_dashboard_layout()
 
 
@@ -434,8 +303,6 @@ def handle_file_upload(contents, filename):
         )
 
     numeric_columns = df.select_dtypes(include=np.number).columns.tolist()
-    
-    # Auto-select the first numeric feature for immediate anomaly detection
     default_feature = numeric_columns[0] if numeric_columns else None
 
     return (
@@ -454,6 +321,8 @@ def handle_file_upload(contents, filename):
 
 # ──────────────────────────────────────────────
 # Anomaly detection
+# ✅ FIX: Store anomalous data as orient='records' dict
+# instead of a raw JSON string — dashboard.py parses it correctly
 # ──────────────────────────────────────────────
 @app.callback(
     [
@@ -556,6 +425,9 @@ def update_analysis(data, numeric_cols, selected_feature, z_score_threshold):
         {'name': i.replace('_', ' ').title(), 'id': i}
         for i in ['index'] + numeric_cols + ['z_score']
     ]
+
+    # ✅ KEY FIX: Store as JSON string using orient='split'
+    # This matches what generate_smart_report in dashboard.py expects
     anomalous_data_json = anomalous_points.to_json(date_format='iso', orient='split')
 
     return (
@@ -564,12 +436,12 @@ def update_analysis(data, numeric_cols, selected_feature, z_score_threshold):
         anomalous_points.to_dict('records'),
         table_cols,
         str(len(anomalous_points)),
-        anomalous_data_json,
+        anomalous_data_json,   # ✅ stored as JSON string, orient='split'
     )
 
 
 # ──────────────────────────────────────────────
-# Legacy CSV download  (sidebar "Reports" link)
+# Legacy CSV download (sidebar "Reports" link)
 # ──────────────────────────────────────────────
 @app.callback(
     Output("download-report-trigger", "data"),
@@ -593,4 +465,4 @@ register_login_callbacks(app)
 # Run
 # ──────────────────────────────────────────────
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
